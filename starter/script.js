@@ -3,6 +3,32 @@
 const btn = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
 
+const renderCountry = function (data, className = '') {
+  const html = `
+  <article class="country ${className}">
+    <img class="country__img" src="${data.flag}" />
+    <div class="country__data">
+      <h3 class="country__name">${data.name}</h3>
+      <h4 class="country__region">${data.region}</h4>
+      <p class="country__row"><span>👫</span>${(
+        data.population / 1000000
+      ).toFixed(1)}</p>
+      <p class="country__row"><span>🗣️</span>${data.languages[0].name}</p>
+      <p class="country__row"><span>💰</span>${data.currencies[0].name}</p>
+    </div>
+  </article>
+`;
+
+  countriesContainer.insertAdjacentHTML('beforeend', html);
+
+  // countriesContainer.style.opacity = 1;
+};
+
+const renderError = function (message) {
+  countriesContainer.insertAdjacentText('beforeend', message);
+  // countriesContainer.style.opacity = 1;
+};
+
 //api change
 //https://countries-api-836d.onrender.com/countries/
 
@@ -49,27 +75,6 @@ const countriesContainer = document.querySelector('.countries');
 // getCountryData('germany');
 
 /////////////////////////////////////////////////////////////////
-
-const renderCountry = function (data, className = '') {
-  const html = `
-  <article class="country ${className}">
-    <img class="country__img" src="${data.flag}" />
-    <div class="country__data">
-      <h3 class="country__name">${data.name}</h3>
-      <h4 class="country__region">${data.region}</h4>
-      <p class="country__row"><span>👫</span>${(
-        data.population / 1000000
-      ).toFixed(1)}</p>
-      <p class="country__row"><span>🗣️</span>${data.languages[0].name}</p>
-      <p class="country__row"><span>💰</span>${data.currencies[0].name}</p>
-    </div>
-  </article>
-`;
-
-  countriesContainer.insertAdjacentHTML('beforeend', html);
-
-  countriesContainer.style.opacity = 1;
-};
 
 const getCountryAndNeighbour = function (country) {
   //AJAX call country 1
@@ -137,24 +142,56 @@ const getCountryAndNeighbour = function (country) {
 //   console.log(fetchRequest);//fullfilled after 3 seconds
 // }, 3000);
 
+// const getCountryData = function (country) {
+//   fetch(`https://restcountries.com/v2/name/${country}`)
+//     .then(function (response) {
+//       console.log(response);
+//       return response.json(); //json also returns a new promise
+//     })
+//     .then(function (data) {
+//       console.log(data);
+//       renderCountry(data[0]);
+//     });
+// };
+
 const getCountryData = function (country) {
+  //country 1
   fetch(`https://restcountries.com/v2/name/${country}`)
-    .then(function (response) {
-      console.log(response);
-      return response.json(); //json also returns a new promise
+    .then(
+      response => response.json() //json also returns a new promise
+    )
+    .then(data => {
+      renderCountry(data[0]);
+
+      const neighbour = data[0].borders?.[0];
+
+      if (!neighbour) {
+        return;
+      }
+
+      //country 2
+      return fetch(`https://restcountries.com/v2/alpha/${neighbour}`); //must return fetch
     })
-    .then(function (data) {
-      console.log(data);
+    .then(response => response.json()) //must return response.json()
+    .then(data => {
+      renderCountry(data, 'neighbour');
+    })
+    .catch(error => {
+      console.error(`${error} 💥`);
+      renderError(`Something went wrong. ${error.message}. Try again`);
+    })
+    .finally(() => {
+      countriesContainer.style.opacity = 1;
     });
 };
 
-getCountryData('madagascar');
+//function(){fetch().then().then()}
 
-/////////////////////////////////////////////////
-//TCP - breaks requests/responses into small chunks called packets.
-// ... Than reassemble these packets once they have arrived to their location
+btn.addEventListener('click', function () {
+  getCountryData('portugal');
+});
 
-//IP - Sends/ Routes the packets through the internet using IP addresses on each packet
 
-//TCP disassembles and assembles the packets to and from the requests.
-// ... While IP determines how the packets are routed to their destination?
+
+//Handling rejected promises
+////////////////////////////////////////////////////////////

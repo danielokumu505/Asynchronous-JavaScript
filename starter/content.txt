@@ -1,0 +1,8 @@
+ /////////////////////////////////////////////////
+//TCP - breaks requests/responses into small chunks called packets.
+// ... Than reassemble these packets once they have arrived to their location
+
+//IP - Sends/ Routes the packets through the internet using IP addresses on each packet
+
+//TCP disassembles and assembles the packets to and from the requests.
+// ... While IP determines how the packets are routed to their destination?

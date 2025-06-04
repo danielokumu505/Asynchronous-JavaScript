@@ -134,6 +134,9 @@ const getCountryAndNeighbour = function (country) {
 //deep nesting : hard to maintain and difficult to understand and reason about hence more bugs , and difficult to add more features and functionality
 
 //Promises and the fetch API************************************************************************************
+//with
+//Handling rejected promises*********************
+
 // const fetchRequest = fetch(`https://restcountries.com/v2/name/portugal`);
 
 // console.log(fetchRequest);//pending
@@ -212,24 +215,29 @@ const getCountryData = function (country) {
   //country 1
 
   getJSON(`https://restcountries.com/v2/name/${country}`, `Country not found`)
-    .then(data => {
-      renderCountry(data[0]);
+    .then(
+      data =>
+        //{
+        {
+          console.log(data);
+          renderCountry(data[0]);
+        }
+      //   const neighbour = data[0].borders?.[0];
 
-      const neighbour = data[0].borders?.[0];
+      //   if (!neighbour) {
+      //     throw new Error('No neighbour found');
+      //   }
 
-      if (!neighbour) {
-        throw new Error('No neighbour found');
-      }
-
-      //country 2
-      return getJSON(
-        `https://restcountries.com/v2/alpha/${neighbour}`,
-        'Country not found'
-      );
-    })
-    .then(data => {
-      renderCountry(data, 'neighbour');
-    })
+      //   //country 2
+      //   return getJSON(
+      //     `https://restcountries.com/v2/alpha/${neighbour}`,
+      //     'Country not found'
+      //   );
+      // })
+      // .then(data => {
+      //   renderCountry(data, 'neighbour');
+      // }
+    )
     .catch(error => {
       console.error(`${error}`);
       renderError(`Something went wrong. ${error.message}. Try again`);
@@ -245,5 +253,16 @@ btn.addEventListener('click', function () {
   getCountryData('australia');
 });
 
-//Handling rejected promises
 ////////////////////////////////////////////////////////////
+//The event loop in practice*****************************
+//microtask queue has priority over callback queue
+//working with timers and promises together may delay timers since promises have a priority in the microtask queue 
+//... over timers in the callback queue
+console.log('Test start');
+setTimeout(() => console.log(`0 seconds`), 0);
+Promise.resolve('Resolved Promise 1').then(response => console.log(response));
+Promise.resolve('Resolved Promise 2').then(response => {
+  for (let x = 0; x < 1000000; x++) {}
+  console.log(response);
+});
+console.log(`Test end`);

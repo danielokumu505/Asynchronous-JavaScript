@@ -483,14 +483,81 @@ const get3Countries = async function (c1, c2, c3) {
       getJSON(`https://restcountries.com/v2/name/${c3}`),
     ]); //takes in an array of promises and returns them at the same time
 
-    //note : when one promise rejects, the whole promise.all() rejects
+    //note : when one promise rejects, the whole promise.all() rejects ie short circuits**
 
     console.log(data);
 
-    console.log(data.map(array => array[0].capital));
+    console.log(data.map(array => array[0].capital));//map returns a new array
   } catch (error) {
     console.error(error);
   }
 };
 
-get3Countries('portugal', 'canada', 'tanzania');
+// get3Countries('portugal', 'canada', 'tanzania');
+
+//Other promise combinators; race,allsettled,any************************************************
+//Promise.race returns the first promise to be fullfilled
+
+(async function () {
+  const response = await Promise.race([
+    getJSON(`https://restcountries.com/v2/name/italy`),
+    getJSON(`https://restcountries.com/v2/name/egypt`),
+    getJSON(`https://restcountries.com/v2/name/mexico`),
+  ]);
+
+  // console.log(response[0]);
+})();
+
+//note : when one promise rejects, the whole promise.all() rejects ie short circuits**
+
+//use case : to time fetching of a resource. if more than the stipulated time is taken,the timeout is returned
+const timeout = function (ms) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(function () {
+      reject(new Error('Request took to long'));
+    }, ms);
+  });
+};
+
+// Promise.race([getJSON(`https://restcountries.com/v2/name/italy`), timeout(700)])
+//   .then(response => {
+//     console.log(response);
+//   })
+//   .catch(error => console.error(error));
+
+//Promise.allsettled**********************************************************************
+//takes in an array of promises and returns all settled promises whether fulfilled or rejected
+
+Promise.allSettled([
+  Promise.resolve('Success'),
+  Promise.reject('Error'),
+  Promise.resolve('Another success'),
+]).then(response => {
+  console.log(response);
+});
+
+Promise.all([
+  Promise.resolve('Success'),
+  Promise.reject('Error'),
+  Promise.resolve('Another success'),
+])
+  .then(response => {
+    console.log(response);
+  })
+  .catch(error => console.error(error)); //will short circuit if there is one rejected promise
+
+//Promise.any***********************************************************************
+
+Promise.any([
+  Promise.resolve('Success'),
+  Promise.reject('Error'),
+  Promise.resolve('Another success'),
+  // getJSON(`https://restcountries.com/v2/name/italy`),
+  // getJSON(`https://restcountries.com/v2/name/egypt`),
+  // getJSON(`https://restcountries.com/v2/name/mexico`),
+])
+  .then(response => {
+    console.log(response);
+  })
+  .catch(error => console.error(error)); //takes in an array of promises and returns the first fullfilled promise,
+//...and ignore rejected promises.Similar to promise.race but rejected promises are ignored

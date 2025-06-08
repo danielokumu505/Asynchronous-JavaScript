@@ -54,23 +54,72 @@ createImage = function (imgPath) {
 
 let currentImage;
 
-createImage('img/img-1.jpg')
-  .then(response => {
-    currentImage = response;
+// createImage('img/img-1.jpg')
+//   .then(response => {
+//     currentImage = response;
+//     console.log(`Image 1 loaded`);
+//     return wait(2);
+//   })
+//   .then(() => {
+//     currentImage.style.display = 'none';
+//     return createImage('img/img-2.jpg');
+//   })
+//   .then(response => {
+//     currentImage = response;
+//     console.log(`Image 2 loaded`);
+//     return wait(2);
+//   })
+//   .then(() => {
+//     currentImage.style.display = 'none';
+//   })
+//   .catch(error => console.error(error));
+
+//Coding challenge 3*****************************************
+
+const loadNpause = async function () {
+  try {
+    //load image 1
+    let img = await createImage('img/img-1.jpg');
+
     console.log(`Image 1 loaded`);
-    return wait(2);
-  })
-  .then(() => {
-    currentImage.style.display = 'none';
-    return createImage('img/img-2.jpg');
-  })
-  .then(response => {
-    currentImage = response;
-    console.log(`Image 2 loaded`);
-    return wait(2);
-  })
-  .then(() => {
-    currentImage.style.display = 'none';
-  })
-  .catch(error => console.error(error));
-// starter\img\img-1.jpg
+
+    await wait(2);
+
+    img.style.display = 'none';
+
+    //load image 2
+    img = await createImage('img/img-2.jpg');
+
+    console.log(`Image 1 loaded`);
+
+    await wait(2);
+
+    img.style.display = 'none';
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// loadNpause();
+
+//
+
+const loadAll = async function (imgArr) {
+  try {
+    const imgs = imgArr.map( img => createImage(img)); //map returns a new array**
+
+    console.log(imgs);
+
+    const imageElements = await Promise.all(imgs);
+
+    console.log(imageElements);
+
+    imageElements.forEach(imageElement =>
+      imageElement.classList.add('parallel')
+    );
+  } catch (error) {
+    console.error;
+  }
+};
+
+loadAll(['img/img-1.jpg', 'img/img-2.jpg', 'img/img-3.jpg']);
